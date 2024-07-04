@@ -1,0 +1,25 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Django",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/web_application/manage.py",
+            "args": [
+                "runserver"
+            ],
+            "django": true
+        },
+        {
+            "name": "Python: Django Tests",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/web_application/manage.py",
+            "args": [
+                "test",
+            ],
+            "django": true
+        },
+    ]
+}
