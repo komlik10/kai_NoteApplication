@@ -1,11 +1,16 @@
 from django.views.generic import DetailView, UpdateView, CreateView
 from django.db import transaction
+from django.shortcuts import redirect
+from django.contrib.auth import logout
+
 from django.urls import reverse_lazy
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from .models import Profile
 from .forms import UserUpdateForm, ProfileUpdateForm, UserRegisterForm, UserLoginForm
 
+
+from django.contrib.auth.decorators import login_required
 
 
 
@@ -74,22 +79,59 @@ class UserRegisterView(SuccessMessageMixin, CreateView):
         context['title'] = 'Регистрация на сайте'
         return context
 
+# class UserLoginView(SuccessMessageMixin, LoginView):
+#     """
+#     Авторизация на сайте
+#     """
+
+#     form_class = UserLoginForm
+#     template_name = 'system/user_login.html'
+#     next_page = 'home'
+#     success_message = 'Добро пожаловать на сайт!'
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['title'] = 'Авторизация на сайте'
+#         return context
+
 class UserLoginView(SuccessMessageMixin, LoginView):
     """
     Авторизация на сайте
     """
+
     form_class = UserLoginForm
     template_name = 'system/user_login.html'
     next_page = 'home'
     success_message = 'Добро пожаловать на сайт!'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_context_data(self, *kwargs):
+        context = super().get_context_data(*kwargs)
         context['title'] = 'Авторизация на сайте'
         return context
+
+    def dispatch(self, request, *args):
+        if request.user.is_authenticated:
+            # Пользователь уже авторизован, перенаправляем на главную страницу
+            return redirect('/notes')
+        return super().dispatch(request, *args,)
+
     
+from django.contrib.auth.views import LogoutView
+
 class UserLogoutView(LogoutView):
     """
-    Выход с сайта
+    Класс для выхода пользователя из системы с возможностью дополнительной логики.
     """
-    next_page = 'home'
+
+    def dispatch(self, request, *args, **kwargs):
+        """
+        Переопределенный метод для выполнения дополнительных действий после выхода.
+        """
+        response = super().dispatch(request, *args, **kwargs)
+        
+        # Здесь можно добавить дополнительную логику после выхода из системы
+        # Например, записать информацию о выходе в журнал или изменить сообщение
+        self.request.session.flush()  # Очистить сессию пользователя
+        return redirect('/')
+
+        # return response

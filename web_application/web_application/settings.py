@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'modules.system.apps.SystemConfig',
     'notes.apps.NotesConfig',
+    'rest_framework',
     'mptt',
     'modules.services',
 
@@ -66,6 +67,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'web_application.wsgi.application'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases

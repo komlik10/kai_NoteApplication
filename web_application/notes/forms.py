@@ -9,7 +9,7 @@ class NoteCreationForm(forms.ModelForm):
     """
     class Meta:
         model = Note
-        fields = ('title', 'slug', 'full_description', 'status')
+        fields = ('title', 'full_description', 'status')
 
     def __init__(self, *args, **kwargs):
         """
@@ -18,6 +18,7 @@ class NoteCreationForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].widget.attrs.update({
-                'class': 'form-control',
+                'class': 'form-control',  'background-color':'red',
+                'color': 'red',
                 'autocomplete': 'off'
             })

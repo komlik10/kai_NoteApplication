@@ -46,12 +46,10 @@ class Note(models.Model):
     """
     Модель постов для сайта
     """    
-
     STATUS_OPTIONS = (
         ('published', 'Основное'), 
         ('archive', 'Архив')
     )
-
     title = models.CharField(verbose_name='Заголовок', max_length=255)
     slug = models.SlugField(verbose_name='URL', max_length=255, blank=True, unique=True)
     full_description = models.TextField(verbose_name='Полное описание')
