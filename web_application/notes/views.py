@@ -5,7 +5,9 @@ from django.shortcuts import render
 from rest_framework.permissions import IsAuthenticated
 from django.urls import reverse_lazy
 from .models import Note
-from .forms import NoteCreationForm
+from django.views.generic.edit import UpdateView
+from django.shortcuts import redirect
+from .forms import NoteCreationForm, NoteUpdateForm
 from rest_framework.generics import ListAPIView
 from .serializers import NoteSerializer
 from django.http import HttpResponseRedirect
@@ -47,12 +49,21 @@ class UserNotesView(ListAPIView):
 from django.views.generic import ListView
 
 class NoteListView(ListView):
+    
     model = Note
     template_name = 'note/note_list.html'
     context_object_name = 'articles'
 
+    def dispatch(self, request, *args):
+        if request.user.is_authenticated == False:
+            # Пользователь уже авторизован, перенаправляем на главную страницу
+            return redirect('/login')
+        return super().dispatch(request, *args,)
+
     def get_queryset(self):
         user = self.request.user
+        # if user == None:
+        #     return redirect('login/')
         return Note.objects.filter(author=user)
 
     def get_context_data(self, *kwargs):
@@ -90,25 +101,32 @@ class NoteCreateView(CreateView):
         form.save()
         return super().form_valid(form)
 
-
-class NoteDeleteView(DeleteView):
+class NoteUpdateView(UpdateView):
     """
-    Представление: удаление заметки без подтверждения
+    Представление: обновление заметки на сайте
     """
     model = Note
-    template_name = ''  # Установите пустое значение, чтобы не использовать шаблон подтверждения
+    template_name = 'note/note_update.html'  # Шаблон для отображения формы обновления
+    form_class = NoteUpdateForm  # Класс формы для валидации данных формы
+    pk_url_kwarg = 'pk'  # Имя аргумента URL, содержащего первичный ключ объекта
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Обновление статьи на сайт'
+        return context
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user  # Устанавливаем автора как текущего пользователя
+        return super().form_valid(form)
+
+
+class NoteDeleteView(DeleteView):
+    model = Note
+    success_url = reverse_lazy('home')  # Используйте reverse_lazy для определения URL-адреса перенаправления
+    template_name = 'note/note_delete_confirm.html'
 
     def delete(self, request, *args, **kwargs):
-        """
-        Метод delete переопределяется для добавления дополнительной логики перед удалением,
-        например, проверка прав доступа.
-        """
         obj = self.get_object()
-        if not request.user == obj.author:
-            raise PermissionDenied("У вас нет разрешения на удаление этой заметки.")
-        
-        # Удаление заметки
+        # Здесь можно добавить дополнительную логику, например, проверку прав доступа
         obj.delete()
-        
-        # Перенаправление на главную страницу
-        return HttpResponseRedirect(reverse_lazy('home'))  # Замените 'home' на имя URL-маршрута вашей главной страницы
+        return redirect('home')  # Используйте redirect для перенаправления на главную страницу
