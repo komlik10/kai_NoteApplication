@@ -24,6 +24,7 @@ class Profile(models.Model):
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
 
+
     def save(self, *args, **kwargs):
         """
         Сохранение полей модели при их отсутствии заполнения
@@ -32,11 +33,13 @@ class Profile(models.Model):
             self.slug = unique_slugify(self, self.user.username)
         super().save(*args, **kwargs)
     
+
     def __str__(self):
         """
         Возвращение строки
         """
         return self.user.username
+    
     
     def get_absolute_url(self):
         """

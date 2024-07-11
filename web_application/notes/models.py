@@ -6,7 +6,6 @@ from django.urls import reverse
 from modules.services.utils import unique_slugify
 
 
-
 class Category(MPTTModel):
     title = models.CharField(max_length=255, verbose_name='Название категории')
     slug = models.SlugField(max_length=255, verbose_name='URL категории', blank=True)
@@ -58,9 +57,11 @@ class Note(models.Model):
     time_update = models.DateTimeField(auto_now=True, verbose_name='Время обновления')
     author = models.ForeignKey(to=User, verbose_name='Автор', on_delete=models.SET_DEFAULT, related_name='author_posts', default=1)
 
+
     def get_absolute_url(self):
-        return reverse('note_detail', kwargs={'slug': self.slug})  
-    
+        return reverse('note_detail', kwargs={'pk': self.pk})  
+
+
     def save(self, *args, **kwargs):
             """
             Сохранение полей модели при их отсутствии заполнения
@@ -68,6 +69,7 @@ class Note(models.Model):
             if not self.slug:
                 self.slug = unique_slugify(self, self.title)
             super().save(*args, **kwargs)
+
 
     class Meta:
         db_table = 'app_notes'
